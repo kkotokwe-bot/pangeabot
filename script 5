@@ -1,0 +1,75 @@
+#KK12052022
+#Merging of other demographic data 
+
+setwd("/Users/peggy/Downloads/Treestructure/Treestructure Final Analysis_01122021")
+#LOAD THE FOLLOWING LIBRARIES
+library(stats)
+library(ade4)
+library(ape)
+library(adegenet)
+library(phangorn)
+library(chisq.posthoc.test)
+library(dplyr)
+library(ape)
+library(treedater)
+library(treestructure)
+library(msa)
+library(Biostrings)
+library(ggpubr)
+
+geneRegion <- "pol"
+
+
+mainepi_2 <- read.csv("new_partitioncombinefinal2_epi.csv",TRUE, ",", stringsAsFactors = F)
+allnames_2 <- read.csv("LONGCOHORTedited_YR1_20SAMP.csv",TRUE, ",", stringsAsFactors = F)
+csvfinal_2 <- merge(mainepi_2, allnames_2, by.x = "BWid",
+                    by.y = "subject_identifier", all.x = TRUE, all=TRUE)
+
+#removing the sequences that dont have partitions
+new_demographicscombination <- csvfinal_2[!is.na(csvfinal_2$partition),]
+demogFinal0 <- new_demographicscombination %>%     group_by(BWid) %>%   filter(n()==1)
+
+##Removing non- BCPP sequences(only mochudi in this cohort)
+demogFinal1<-demogFinal0[-grep("mochudi", demogFinal0$study_FINAL),]
+
+
+#Write the CSV file for the combined demographics 
+write.csv(demogFinal1 , paste0("demogFinal1_pol", "_file.csv",sep=""))
+
+library (data.table)
+DC <- data.table(demogFinal1)
+DC[, districts := ifelse(community %in% c("ranaka", "digawana","molapowabojang","mmankgodi", "mmathethe"), "southern",
+                         ifelse(community %in% c("lerala", "sefophe", "maunatlala", "ramokgonami","mmadinare", "shoshong","nkange","sebina","mathangwane", "mmandunyane","gumare","rakops","sefhare","tsetsebjwe","nata"), "central",
+                                ifelse(community %in% c("masunga", "tati_siding"), "north east",
+                                       ifelse(community %in% c("otse"), "south east",
+                                              ifelse(community %in% c("bokaa","oodi" ), "kgatleng",
+                                                     ifelse(community %in% c("letlhakeng","lentsweletau","metsimotlhabe"), "kweneng",
+                                                            ifelse(community %in% c("gweta", "shakawe"), "ngamiland", NA)))))))]
+#write and read the csv file
+
+write.csv(DC , paste("_combineddemo1", "_file.csv",sep=""))
+
+dfgag <-data.frame(partitionID=0, F=0, M=0, sexNA=0, meanAge=0, chronic=0, recent=0,stagetruepredictNA=0, decimalDate=0, no=0, yes=0,ARTyesnoNA=0, stringsAsFactors = F)
+for (i in 1:max(DC$partition)){
+  print(i)
+  partition_csv1 <- DC[DC$partition==i,]
+  
+  #sex table
+  sex_tab <- round(prop.table(table(partition_csv1$genderFINAL, useNA= "always"))*100,1)
+  
+  #calculate mean age
+  meanAgePartition <- round(mean(partition_csv1$enrollAgeFINAL, na.rm = T),1)
+  
+  #stageofinfection
+  stagetruepredict<- round(prop.table(table (partition_csv1$stage_true_predict, useNA = "always"))*100,1)
+  
+  #Year
+  decimalDate <- round(mean(partition_csv1$decimalDate, na.rm= T, useNA= "always"),1)
+  
+  #ARTstatus
+  TreatmentStatus <- round(prop.table(table(partition_csv1$ARTyesno, useNA= "always"))*100,1)
+  
+  dfgag[i,] <- c(i, as.numeric(sex_tab[1]), as.numeric(sex_tab[2]), as.numeric(sex_tab[3]), meanAge=meanAgePartition, as.numeric(stagetruepredict[1]), as.numeric(stagetruepredict[2]), as.numeric(stagetruepredict[3]), decimalDate=decimalDate, as.numeric(TreatmentStatus[1]),as.numeric(TreatmentStatus[2]),as.numeric(TreatmentStatus[3]))
+}
+
+
