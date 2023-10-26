@@ -60,7 +60,7 @@ for (i in 1:max(as.numeric(ts_dft$partition))){
                               numStartConditions = 1, maxit = 1, meanRateLimits = c(0.001,  0.003),
                               ncpu = 1)
     
-     tMRCAs <- c(tMRCAs, boot_dated[[j]]$timeOfMRCA) ## this it the time of MRCAs
+    tMRCAs <- c(tMRCAs, boot_dated[[j]]$timeOfMRCA) ## this it the time of MRCAs
   }
   
   write.csv(data.frame("tMRCA"=tMRCAs), paste(geneRegion, prefix, "csv", sep = "." ))
@@ -125,7 +125,7 @@ f = readRDS(paste0("seq_partition_",1, ".rds" ))
 pne = plot(f, logy=F, ggplot=T) + theme_classic() + xlab('')
 pne$data$date <- as.Date( date_decimal( pne$data$t ))
 (pne1 <- ggplot( data = pne$data , aes(x = date)),  pne2 <- ggplot( data = pne$data , aes(x = date)), pne3 <- ggplot( data = pne$data , aes(x = date)) + 
- 
+    
     geom_ribbon(aes(ymin = nelb, ymax = neub), alpha = .50, fill = '#DD6200' , colour='white') + 
     geom_line( aes(y =  nemed), lwd = .8) + 
     theme_classic() + xlab('') + ylab('Effective population size' )

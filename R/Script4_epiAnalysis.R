@@ -114,7 +114,7 @@ chisq.test(table(demogFinal3$partition, demogFinal3$stage_true_predict ))
 table(demogFinal3$partition, demogFinal3$ARTyesno)						
 chisq.test(table(demogFinal3$partition, demogFinal3$ARTyesno ))	
 
-	
+
 
 ###Further analysis of Chisq.posthoc.test
 
